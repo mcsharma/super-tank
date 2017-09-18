@@ -1,5 +1,5 @@
 {
-  "name": "Super Tank",
+  "name": "super-tank",
   "version": "2.0.0",
   "description": "Tank game in JS",
   "main": "./dist/bundle.js",

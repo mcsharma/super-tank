@@ -1,7 +1,7 @@
 # Super Tank
 Tank game Implemented using TypeScript and React.
 
-Hosted on Heroku: https://supertank.herokuapp.com/
+Hosted on Heroku: https://playtank.herokuapp.com/
 
 ### Want to play with the code? ###
 
