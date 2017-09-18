@@ -1,6 +1,6 @@
 {
   "name": "Super Tank",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "Tank game in JS",
   "main": "./dist/bundle.js",
   "dependencies": {
