@@ -1,0 +1,37 @@
+html,
+body {
+  height: 100%;
+}
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background-color: black;
+  color: white;
+}
+#root-container {
+  align-items: center;
+  display: flex;
+  height: 100%;
+}
+#root-container .ts-arena {
+  position: fixed;
+  display: flex;
+}
+#root-container .ts-arena .tk-board {
+  margin-left: 20px;
+  position: relative;
+  border: 2px solid white;
+  outline: none;
+}
+#root-container .ts-arena .tk-game-info {
+  margin-left: 20px;
+}
+.tk-block {
+  position: absolute;
+}
+.tk-bullet {
+  position: absolute;
+  border-radius: 5px;
+}
+
+/*# sourceMappingURL=bundle.css.map*/
