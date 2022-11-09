@@ -8,12 +8,11 @@ export type PointWithDir = Readonly<{
   dir: Dir;
 }>;
 
-export type TankState = Readonly<
-  PointWithDir & {
+export type TankState = PointWithDir &
+  Readonly<{
     id: string;
     bullets: ReadonlyArray<PointWithDir>;
-  }
->;
+  }>;
 
 export type GameState = Readonly<{
   dispatch: (action: Action) => void;

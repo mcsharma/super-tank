@@ -1,6 +1,6 @@
 import { Action, useFireFromTankAuto, useMoveTankAuto } from "./actions";
 import { HEIGHT, WIDTH } from "./config";
-import { GameState, PointWithDir } from "./GameContext";
+import { GameState, PointWithDir, TankState } from "./GameContext";
 import { Dir, getRandomInteger, isValidPoint } from "./util";
 
 export function reducer(state: GameState, action: Action): GameState {
@@ -59,7 +59,7 @@ function fireFromTankAuto(tankID: string, state: GameState): GameState {
 
 function fireFromTank(tankID: string, state: GameState): GameState {
   let tank = state.tanks[tankID];
-  let bullet = null;
+  let bullet: PointWithDir | null = null;
   switch (tank.dir) {
     case Dir.UP:
       bullet = {
@@ -118,9 +118,12 @@ function moveBullets(tankID: string, state: GameState): GameState {
       }
       return newBullet;
     })
-    .filter((bullet) => bullet !== null);
+    .filter((bullet): bullet is PointWithDir => bullet != null);
 
-  const updatedTank = { ...state.tanks[tankID], bullets: newBullets };
+  const updatedTank: TankState = {
+    ...state.tanks[tankID],
+    bullets: newBullets,
+  };
   return {
     ...state,
     tanks: {
