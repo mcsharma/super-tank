@@ -2,7 +2,7 @@ import * as React from "react";
 import { Tank } from "./Tank";
 import { BLOCK_SIZE, HEIGHT, WIDTH } from "./config";
 import { Dir, Point } from "./util";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { GameContext } from "./GameContext";
 import { useFireFromTank, useTurnOrMoveTank } from "./actions";
 
@@ -26,31 +26,29 @@ export function SuperTankBoard() {
   let boardHeight = BLOCK_SIZE * HEIGHT + (HEIGHT + 1);
   let boardStyle = { width: boardWidth, height: boardHeight };
 
-  const selfTankRef = useRef(null);
-
-  const onKeyPress = (keyCode: number) => {
-    if (keyCode === 38) {
-      turnOrMoveTank(playerTankID, Dir.UP);
-    } else if (keyCode === 37) {
-      turnOrMoveTank(playerTankID, Dir.LEFT);
-    } else if (keyCode === 39) {
-      turnOrMoveTank(playerTankID, Dir.RIGHT);
-    } else if (keyCode === 40) {
-      turnOrMoveTank(playerTankID, Dir.DOWN);
-    } else if (keyCode === 70) {
-      // Key 'f'
-      fireFromTank(playerTankID);
-    }
-  };
+  useEffect(() => {
+    const onKeyDown = ({ key }: KeyboardEvent) => {
+      if (key === "ArrowUp") {
+        turnOrMoveTank(playerTankID, Dir.UP);
+      } else if (key === "ArrowLeft") {
+        turnOrMoveTank(playerTankID, Dir.LEFT);
+      } else if (key === "ArrowRight") {
+        turnOrMoveTank(playerTankID, Dir.RIGHT);
+      } else if (key === "ArrowDown") {
+        turnOrMoveTank(playerTankID, Dir.DOWN);
+      } else if (key === "f") {
+        fireFromTank(playerTankID);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
 
   return (
     <div className="ts-arena">
-      <div
-        className="tk-board"
-        tabIndex={0}
-        style={boardStyle}
-        onKeyDown={(evt) => onKeyPress(evt.keyCode)}
-      >
+      <div className="tk-board" style={boardStyle}>
         {Object.keys(tanks).map((tankID) => {
           return (
             <Tank
