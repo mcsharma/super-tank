@@ -1,5 +1,5 @@
 import * as React from "react";
-import { callEveryNMs, Dir, isValidPoint, Point, tankLayout } from "./util";
+import { Dir, getBlockPositions, isValidPoint, Point } from "./util";
 import { BLOCK_SIZE } from "./config";
 import { TankState } from "./GameContext";
 import { useEffect } from "react";
@@ -25,31 +25,33 @@ export function Tank({ moveType, tank }: Props) {
   const moveTankAuto = useMoveTankAuto();
   const fireFromTankAuto = useFireFromTankAuto();
   useEffect(() => {
-    callEveryNMs(() => {
+    let timer1 = window.setInterval(() => {
       moveBullets(tank.id);
-      return true;
     }, 20);
+    let timer2: number | null = null;
+    let timer3: number | null = null;
     if (moveType === "auto") {
-      callEveryNMs(() => {
+      timer2 = window.setInterval(() => {
         moveTankAuto(tank.id);
-        return true;
-      }, 100);
-      callEveryNMs(() => {
+      }, 200);
+      timer3 = window.setInterval(() => {
         fireFromTankAuto(tank.id);
-        return true;
       }, 500);
     }
+    return () => {
+      clearInterval(timer1);
+      if (timer2 !== null) {
+        clearInterval(timer2);
+      }
+      if (timer3 !== null) {
+        clearInterval(timer3);
+      }
+    };
   }, []);
 
-  const blockPositions = tankLayout[tank.dir].map((pos) => {
-    return {
-      y: tank.y + pos.y,
-      x: tank.x + pos.x,
-    };
-  });
   return (
     <div className="tk-tank">
-      {blockPositions.map((pos) => {
+      {getBlockPositions(tank).map((pos) => {
         let left = pos.x * BLOCK_SIZE + (pos.x + 1);
         let top = pos.y * BLOCK_SIZE + (pos.y + 1);
         return (
@@ -61,7 +63,7 @@ export function Tank({ moveType, tank }: Props) {
               top: top,
               width: BLOCK_SIZE,
               height: BLOCK_SIZE,
-              backgroundColor: moveType === "player" ? "lightgreen" : "blue",
+              backgroundColor: moveType === "auto" ? tank.id : "white",
             }}
           ></div>
         );

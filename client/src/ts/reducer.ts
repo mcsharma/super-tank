@@ -1,7 +1,7 @@
 import { Action, useFireFromTankAuto, useMoveTankAuto } from "./actions";
 import { HEIGHT, WIDTH } from "./config";
 import { GameState, PointWithDir, TankState } from "./GameContext";
-import { Dir, getRandomInteger, isValidPoint } from "./util";
+import { Dir, getBlockPositions, getRandomInteger, isValidPoint } from "./util";
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -23,6 +23,11 @@ export function reducer(state: GameState, action: Action): GameState {
 }
 
 function turnOrMove(tankID: string, dir: Dir, state: GameState): GameState {
+  const tank = state.tanks[tankID];
+  if (!tank) {
+    // This tank is dead
+    return state;
+  }
   if (state.tanks[tankID].dir === dir) {
     return moveTank(tankID, state);
   }
@@ -59,6 +64,10 @@ function fireFromTankAuto(tankID: string, state: GameState): GameState {
 
 function fireFromTank(tankID: string, state: GameState): GameState {
   let tank = state.tanks[tankID];
+  if (!tank) {
+    return state;
+  }
+  let allBullets = state.bullets;
   let bullet: PointWithDir | null = null;
   switch (tank.dir) {
     case Dir.UP:
@@ -91,13 +100,29 @@ function fireFromTank(tankID: string, state: GameState): GameState {
       break;
   }
   tank = { ...tank, bullets: [...tank.bullets, bullet] };
-  return { ...state, tanks: { ...state.tanks, [tankID]: tank } };
+  const positionKey = `${bullet.x}:${bullet.y}`;
+  allBullets = { ...allBullets, [positionKey]: tankID };
+  return {
+    ...state,
+    tanks: { ...state.tanks, [tankID]: tank },
+    bullets: allBullets,
+  };
 }
 
 function moveBullets(tankID: string, state: GameState): GameState {
-  const tank = state.tanks[tankID];
-  const newBullets = tank.bullets
+  let updatedTank: TankState | undefined = state.tanks[tankID];
+  if (!updatedTank) {
+    return state;
+  }
+  const teamID = updatedTank.teamID;
+  let updatedEnemyTank: TankState | null = null;
+  let updatedAllBullets = { ...state.bullets };
+  let updatedAllTanks = { ...state.tanks };
+  const updatedTankBullets = updatedTank.bullets
     .map((bullet) => {
+      const positionKey = `${bullet.x}:${bullet.y}`;
+      // Kill the current bullet, if it survive, we'll add it later
+      delete updatedAllBullets[positionKey];
       const newBullet = { ...bullet };
       switch (bullet.dir) {
         case Dir.UP:
@@ -113,24 +138,70 @@ function moveBullets(tankID: string, state: GameState): GameState {
           newBullet.x++;
           break;
       }
+      // If bullet hit the wall
       if (!isValidPoint(newBullet)) {
         return null;
       }
+
+      const newPositionKey = `${newBullet.x}:${newBullet.y}`;
+      const tankIDOfCollidingBullet: string | null =
+        updatedAllBullets[newPositionKey];
+      const tankIDOfCollidingTank = getTankIDAtPosition(
+        newBullet.x,
+        newBullet.y,
+        state
+      );
+
+      // If bullet collides with another bullet
+      if (
+        tankIDOfCollidingBullet != null &&
+        updatedAllTanks[tankIDOfCollidingBullet] != null &&
+        updatedAllTanks[tankIDOfCollidingBullet].teamID !== teamID
+      ) {
+        // Current bullet hit enemy tank's bullet, destry both bullets
+        updatedEnemyTank = state.tanks[tankIDOfCollidingBullet];
+        delete updatedAllBullets[newPositionKey];
+        updatedEnemyTank = {
+          ...updatedEnemyTank,
+          bullets: updatedEnemyTank.bullets.filter(
+            (bullet) => newBullet.x != bullet.x || newBullet.y != bullet.y
+          ),
+        };
+        return null;
+      }
+
+      // If bullet collides with enemy's tank
+      if (
+        tankIDOfCollidingTank != null &&
+        updatedAllTanks[tankIDOfCollidingTank] != null &&
+        updatedAllTanks[tankIDOfCollidingTank].teamID !== teamID
+      ) {
+        const collidingTank = updatedAllTanks[tankIDOfCollidingTank];
+        collidingTank.bullets.forEach((bullet) => {
+          const positionKey = `${bullet.x}:${bullet.y}`;
+          delete updatedAllBullets[positionKey];
+        });
+        delete updatedAllTanks[tankIDOfCollidingTank];
+        return null;
+      }
+
+      // current bullet survived, add it back.
+      updatedAllBullets[newPositionKey] = tankID;
       return newBullet;
     })
     .filter((bullet): bullet is PointWithDir => bullet != null);
 
-  const updatedTank: TankState = {
-    ...state.tanks[tankID],
-    bullets: newBullets,
-  };
-  return {
+  updatedTank = { ...updatedTank, bullets: updatedTankBullets };
+  updatedAllTanks[tankID] = updatedTank;
+  if (updatedEnemyTank != null) {
+    updatedAllTanks[(updatedEnemyTank as TankState).id] = updatedEnemyTank;
+  }
+  let ret = {
     ...state,
-    tanks: {
-      ...state.tanks,
-      [tankID]: updatedTank,
-    },
+    tanks: updatedAllTanks,
+    bullets: updatedAllBullets,
   };
+  return ret;
 }
 
 function moveTank(tankID: string, state: GameState): GameState {
@@ -183,4 +254,21 @@ function canMoveInCurDirection(point: PointWithDir): boolean {
     case Dir.RIGHT:
       return point.x < WIDTH - 2;
   }
+}
+
+function getTankIDAtPosition(
+  x: number,
+  y: number,
+  state: GameState
+): string | null {
+  for (let tankID in state.tanks) {
+    const tank = state.tanks[tankID];
+    const hasCollision = getBlockPositions(tank).some((pos) => {
+      return pos.x == x && pos.y == y;
+    });
+    if (hasCollision) {
+      return tankID;
+    }
+  }
+  return null;
 }
