@@ -63,7 +63,7 @@ export function Tank({ moveType, tank }: Props) {
               top: top,
               width: BLOCK_SIZE,
               height: BLOCK_SIZE,
-              backgroundColor: moveType === "auto" ? tank.id : "white",
+              backgroundColor: tank.color,
             }}
           ></div>
         );
@@ -83,7 +83,7 @@ export function Tank({ moveType, tank }: Props) {
               top: top,
               width: BLOCK_SIZE,
               height: BLOCK_SIZE,
-              backgroundColor: "red",
+              backgroundColor: moveType === "auto" ? "yellow" : "white",
             }}
           ></div>
         );

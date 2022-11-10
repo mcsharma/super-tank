@@ -1,7 +1,13 @@
 import { Action, useFireFromTankAuto, useMoveTankAuto } from "./actions";
 import { HEIGHT, WIDTH } from "./config";
 import { GameState, PointWithDir, TankState } from "./GameContext";
-import { Dir, getBlockPositions, getRandomInteger, isValidPoint } from "./util";
+import {
+  createNewTank,
+  Dir,
+  getBlockPositions,
+  getRandomInteger,
+  isValidPoint,
+} from "./util";
 
 export function reducer(state: GameState, action: Action): GameState {
   switch (action.type) {
@@ -118,6 +124,7 @@ function moveBullets(tankID: string, state: GameState): GameState {
   let updatedEnemyTank: TankState | null = null;
   let updatedAllBullets = { ...state.bullets };
   let updatedAllTanks = { ...state.tanks };
+  let updatedScore = state.score;
   const updatedTankBullets = updatedTank.bullets
     .map((bullet) => {
       const positionKey = `${bullet.x}:${bullet.y}`;
@@ -176,12 +183,17 @@ function moveBullets(tankID: string, state: GameState): GameState {
         updatedAllTanks[tankIDOfCollidingTank] != null &&
         updatedAllTanks[tankIDOfCollidingTank].teamID !== teamID
       ) {
+        if (tankIDOfCollidingTank !== state.playerTankID) {
+          updatedScore++;
+        }
         const collidingTank = updatedAllTanks[tankIDOfCollidingTank];
         collidingTank.bullets.forEach((bullet) => {
           const positionKey = `${bullet.x}:${bullet.y}`;
           delete updatedAllBullets[positionKey];
         });
         delete updatedAllTanks[tankIDOfCollidingTank];
+        const newTank = createNewTank(collidingTank.teamID);
+        updatedAllTanks[newTank.id] = newTank;
         return null;
       }
 
@@ -200,6 +212,7 @@ function moveBullets(tankID: string, state: GameState): GameState {
     ...state,
     tanks: updatedAllTanks,
     bullets: updatedAllBullets,
+    score: updatedScore,
   };
   return ret;
 }

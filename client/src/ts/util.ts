@@ -1,4 +1,4 @@
-import { HEIGHT, WIDTH } from "./config";
+import { COLORS, HEIGHT, NEW_POSITIONS, WIDTH } from "./config";
 import { PointWithDir, TankState } from "./GameContext";
 
 export type Point = {
@@ -48,6 +48,21 @@ export function getBlockPositions(
       x: tank.x + pos.x,
     };
   });
+}
+
+export function createNewTank(teamID: string): TankState {
+  const color = COLORS[getRandomInteger(0, COLORS.length - 1)];
+  const dir: Dir = getRandomInteger(0, 3);
+  const pos = NEW_POSITIONS[getRandomInteger(0, 3)];
+  const id = Math.random().toString(36).slice(5);
+  return {
+    ...pos,
+    dir,
+    color,
+    id,
+    bullets: [],
+    teamID,
+  };
 }
 
 export const tankLayout: Point[][] = [

@@ -12,18 +12,36 @@ body {
 #root {
   align-items: center;
   display: flex;
-  height: 100%;
-  .ts-arena {
-    position: fixed;
+  height: 100vh;
+  justify-content: center;
+  .tk-arena {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     .tk-board {
-      margin-left: 20px;
       position: relative;
       border: 2px solid white;
       outline: none;
     }
     .tk-game-info {
-      margin-left: 20px;
+      width: 100%;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+    }
+    .tk-game-over {
+      height: 100%;
+      width: 100%;
+      position: absolute;
+      left: 0;
+      top: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: rgba(0, 0, 0, 0.7);
+      .tk-game-over-label {
+        font-size: 72px;
+      }
     }
   }
 }

@@ -19,7 +19,7 @@ interface State {
 }
 
 export function SuperTankBoard() {
-  const { tanks, playerTankID } = useContext(GameContext);
+  const { tanks, playerTankID, score } = useContext(GameContext);
   const turnOrMoveTank = useTurnOrMoveTank();
   const fireFromTank = useFireFromTank();
   let boardWidth = BLOCK_SIZE * WIDTH + (WIDTH + 1);
@@ -47,7 +47,11 @@ export function SuperTankBoard() {
   }, []);
 
   return (
-    <div className="ts-arena">
+    <div className="tk-arena">
+      <div className="tk-game-info">
+        <div>Use arrow keys to move, 'F' to shoot.</div>
+        <div>Score: {score}</div>
+      </div>
       <div className="tk-board" style={boardStyle}>
         {Object.keys(tanks).map((tankID) => {
           return (
@@ -58,8 +62,12 @@ export function SuperTankBoard() {
             />
           );
         })}
+        {!tanks[playerTankID] ? (
+          <div className="tk-game-over">
+            <div className="tk-game-over-label">Game Over</div>
+          </div>
+        ) : null}
       </div>
-      <div className="tk-game-info">Use arrow keys to move, 'F' to shoot.</div>
     </div>
   );
 }

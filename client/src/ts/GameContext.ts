@@ -11,6 +11,7 @@ export type PointWithDir = Readonly<{
 export type TankState = PointWithDir &
   Readonly<{
     id: string;
+    color: string;
     teamID: string;
     bullets: ReadonlyArray<PointWithDir>;
   }>;
@@ -21,27 +22,78 @@ export type GameState = Readonly<{
   tanks: Readonly<{ [tankID: string]: TankState }>;
   // Map from string encoded coordinates ("x:y") to Tank ID (tankID)
   bullets: Readonly<{ [key: string]: string }>;
+  score: number;
 }>;
 
 export const initialState: GameState = {
   dispatch: (action) => {},
-  playerTankID: "p",
+  playerTankID: "7",
   tanks: {
-    red: { id: "red", teamID: "A", y: 40, x: 5, dir: Dir.UP, bullets: [] },
-    yellow: {
-      id: "yellow",
+    1: {
+      id: "1",
+      color: "red",
       teamID: "A",
-      y: 20,
-      x: 40,
+      y: 12,
+      x: 12,
+      dir: Dir.UP,
+      bullets: [],
+    },
+    2: {
+      id: "2",
+      color: "yellow",
+      teamID: "A",
+      y: 12,
+      x: 34,
       dir: Dir.DOWN,
       bullets: [],
     },
-    green: { id: "green", teamID: "A", y: 2, x: 5, dir: Dir.UP, bullets: [] },
-    blue: { id: "blue", teamID: "A", y: 5, x: 40, dir: Dir.DOWN, bullets: [] },
-    cyan: { id: "cyan", teamID: "A", y: 5, x: 10, dir: Dir.UP, bullets: [] },
-    pink: { id: "pink", teamID: "A", y: 25, x: 30, dir: Dir.DOWN, bullets: [] },
-    p: { id: "p", teamID: "B", y: 48, x: 36, dir: Dir.UP, bullets: [] },
+    3: {
+      id: "3",
+      color: "green",
+      teamID: "A",
+      y: 12,
+      x: 52,
+      dir: Dir.UP,
+      bullets: [],
+    },
+    4: {
+      id: "4",
+      color: "blue",
+      teamID: "A",
+      y: 30,
+      x: 12,
+      dir: Dir.DOWN,
+      bullets: [],
+    },
+    5: {
+      id: "5",
+      color: "cyan",
+      teamID: "A",
+      y: 30,
+      x: 40,
+      dir: Dir.UP,
+      bullets: [],
+    },
+    6: {
+      id: "6",
+      color: "purple",
+      teamID: "A",
+      y: 30,
+      x: 52,
+      dir: Dir.DOWN,
+      bullets: [],
+    },
+    7: {
+      id: "7",
+      color: "white",
+      teamID: "B",
+      y: 48,
+      x: 37,
+      dir: Dir.UP,
+      bullets: [],
+    },
   },
   bullets: {},
+  score: 0,
 };
 export const GameContext = createContext<GameState>(initialState);
